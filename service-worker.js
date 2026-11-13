@@ -3,7 +3,7 @@
    so returning phones pick up the new app shell instead of a stale cache.
    catalog.json is handled separately below (network-first) so price
    updates don't need a cache-name bump at all. */
-const CACHE_NAME = "ywgpcalc-shell-v2";
+const CACHE_NAME = "ywgpcalc-shell-v3";
 const APP_SHELL = [
   "./",
   "./index.html",

@@ -62,12 +62,26 @@ const LS_CATALOG = "ywGpCalc_catalog_v1";
 const LS_DEAL = "ywGpCalc_deal_v1";
 const LS_CATALOG_VERSION = "ywGpCalc_catalogVersion_v1";
 const LS_DEAL_LOG = "ywGpCalc_dealLog_v1";
+const LS_DEAL_META = "ywGpCalc_dealMeta_v1";
 const CATALOG_URL = "./catalog.json";
+
+// SBAM commission rates — tracked separately from GP so the tool shows
+// both "what Verizon pays the agency" (GP) and "what the SBAM is paid"
+// (Payout) side by side. Store deals are rated New (12%) or Upgrade (5%).
+// Prospecting deals are rated 20% up to a cumulative $15,000 GP per SBAM,
+// then 25% retroactively on that SBAM's entire tracked prospecting GP
+// once they cross the threshold.
+const SBAM_RATE_NEW = 0.12;
+const SBAM_RATE_UPGRADE = 0.05;
+const SBAM_RATE_PROSPECTING_BASE = 0.20;
+const SBAM_RATE_PROSPECTING_TOP = 0.25;
+const PROSPECTING_BREAKPOINT = 15000;
 
 let catalog = [];
 let deal = []; // { id, name, category, payout, type, qty }
 let nextDealId = 1;
-let dealLog = []; // { id, date, accountName, repName, itemCount, totalGP, items:[{name,category,payout,qty,subtotal}] }
+let dealLog = []; // { id, date, accountName, saleType, gpType, storeLocation, storeRep, invoiceNumber, sbamName, itemCount, totalGP, items:[{name,category,payout,qty,subtotal}] }
+let dealMeta = { accountName:"", saleType:"", gpType:"new", storeLocation:"", storeRep:"", invoiceNumber:"", sbamName:"" };
 
 function uid(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
@@ -101,6 +115,19 @@ function loadDealLog(){
 }
 function saveDealLog(){
   localStorage.setItem(LS_DEAL_LOG, JSON.stringify(dealLog));
+}
+function loadDealMeta(){
+  const raw = localStorage.getItem(LS_DEAL_META);
+  if (raw){
+    try { dealMeta = Object.assign({ accountName:"", saleType:"", gpType:"new", storeLocation:"", storeRep:"", invoiceNumber:"", sbamName:"" }, JSON.parse(raw)); return; } catch(e){}
+  }
+}
+function saveDealMeta(){
+  localStorage.setItem(LS_DEAL_META, JSON.stringify(dealMeta));
+}
+function resetDealMeta(){
+  dealMeta = { accountName:"", saleType:"", gpType:"new", storeLocation:"", storeRep:"", invoiceNumber:"", sbamName:"" };
+  saveDealMeta();
 }
 
 /* ---------------- CATEGORY / ITEM SELECTS ---------------- */
@@ -228,6 +255,32 @@ function clearDeal(){
   if (deal.length && !confirm("Start a new deal? This clears the current list.")) return;
   deal = [];
   saveDeal(); renderDeal(); renderSuggestions();
+  resetDealMeta();
+  renderDealDetails();
+}
+
+/* ---------------- DEAL DETAILS (sale type, store/prospecting fields) ---------------- */
+function renderDealDetails(){
+  const accountEl = document.getElementById("dealAccountName");
+  const saleTypeEl = document.getElementById("saleTypeSelect");
+  if (!accountEl || !saleTypeEl) return;
+  accountEl.value = dealMeta.accountName || "";
+  saleTypeEl.value = dealMeta.saleType || "";
+  document.getElementById("storeLocationInput").value = dealMeta.storeLocation || "";
+  document.getElementById("storeRepInput").value = dealMeta.storeRep || "";
+  document.getElementById("invoiceNumberInput").value = dealMeta.invoiceNumber || "";
+  document.getElementById("gpTypeSelect").value = dealMeta.gpType || "new";
+  document.getElementById("sbamNameInput").value = dealMeta.sbamName || "";
+
+  const storeFields = document.getElementById("storeFields");
+  const prospectingFields = document.getElementById("prospectingFields");
+  storeFields.style.display = dealMeta.saleType === "store" ? "grid" : "none";
+  prospectingFields.style.display = dealMeta.saleType === "prospecting" ? "grid" : "none";
+}
+function updateDealMeta(field, value){
+  dealMeta[field] = value;
+  saveDealMeta();
+  if (field === "saleType") renderDealDetails();
 }
 
 /* ---------------- SUGGESTIONS ---------------- */
@@ -454,12 +507,25 @@ function updateVersionTag(){
    the Current Deal. */
 function saveDealToLog(){
   if (deal.length === 0){ alert("Add items to the deal before saving it to your log."); return; }
-  const accountName = (prompt("Account / customer name for this deal (optional):", "") || "").trim();
+  if (!dealMeta.saleType){ alert("Pick a Sale Type (Store or Prospecting) before saving — it's needed to calculate the SBAM payout correctly."); return; }
+  if (dealMeta.saleType === "store" && !dealMeta.invoiceNumber.trim()){
+    if (!confirm("No Invoice # entered. Save anyway? (You won't be able to look this deal up by invoice later.)")) return;
+  }
+  if (dealMeta.saleType === "prospecting" && !dealMeta.sbamName.trim()){
+    alert("Enter the SBAM name before saving a Prospecting deal — it's needed to track that SBAM's running prospecting total.");
+    return;
+  }
   const total = deal.reduce((s,d) => s + d.payout*d.qty, 0);
   const entry = {
     id: uid(),
     date: new Date().toISOString().slice(0,10),
-    accountName: accountName || "(unnamed account)",
+    accountName: dealMeta.accountName.trim() || "(unnamed account)",
+    saleType: dealMeta.saleType,
+    gpType: dealMeta.saleType === "store" ? dealMeta.gpType : "",
+    storeLocation: dealMeta.saleType === "store" ? dealMeta.storeLocation.trim() : "",
+    storeRep: dealMeta.saleType === "store" ? dealMeta.storeRep.trim() : "",
+    invoiceNumber: dealMeta.saleType === "store" ? dealMeta.invoiceNumber.trim() : "",
+    sbamName: dealMeta.saleType === "prospecting" ? dealMeta.sbamName.trim() : "",
     itemCount: deal.length,
     totalGP: total,
     items: deal.map(d => ({ name:d.name, category:d.category, payout:d.payout, qty:d.qty, subtotal: d.payout*d.qty }))
@@ -467,31 +533,96 @@ function saveDealToLog(){
   dealLog.push(entry);
   saveDealLog();
   renderDealLog();
-  showToast(`Saved "${entry.accountName}" — $${formatMoney(total)} — to your GP log.`);
+  showToast(`Saved "${entry.accountName}" — $${formatMoney(total)} GP — to your GP log.`);
+}
+
+/* Computes each log entry's SBAM commission rate and payout dollar amount.
+   Store entries are rated by gpType (New 12% / Upgrade 5%) on that deal's
+   own GP. Prospecting entries are rated by that SBAM's running cumulative
+   prospecting GP across every saved entry: once it reaches $15,000, ALL of
+   that SBAM's prospecting entries — not just the amount over the line —
+   are recalculated at 25% instead of 20% (retroactive, matching the SBAM
+   comp plan). Returns a new array; does not mutate dealLog. */
+function computeLogWithPayouts(log){
+  const prospectingTotals = {};
+  log.forEach(e => {
+    if (e.saleType === "prospecting"){
+      const key = (e.sbamName || "").trim().toLowerCase();
+      prospectingTotals[key] = (prospectingTotals[key] || 0) + e.totalGP;
+    }
+  });
+  return log.map(e => {
+    let rate = 0, payoutLabel = "—";
+    if (e.saleType === "store"){
+      rate = e.gpType === "upgrade" ? SBAM_RATE_UPGRADE : SBAM_RATE_NEW;
+      payoutLabel = e.gpType === "upgrade" ? `Upgrade (${Math.round(SBAM_RATE_UPGRADE*100)}%)` : `New (${Math.round(SBAM_RATE_NEW*100)}%)`;
+    } else if (e.saleType === "prospecting"){
+      const key = (e.sbamName || "").trim().toLowerCase();
+      const sbamTotal = prospectingTotals[key] || 0;
+      const crossed = sbamTotal >= PROSPECTING_BREAKPOINT;
+      rate = crossed ? SBAM_RATE_PROSPECTING_TOP : SBAM_RATE_PROSPECTING_BASE;
+      payoutLabel = crossed ? `Prospecting (${Math.round(SBAM_RATE_PROSPECTING_TOP*100)}%, $15k crossed)` : `Prospecting (${Math.round(SBAM_RATE_PROSPECTING_BASE*100)}%)`;
+    }
+    const payout = e.totalGP * rate;
+    return Object.assign({}, e, { _rate: rate, _payout: payout, _payoutLabel: payoutLabel, _sbamCumulative: e.saleType === "prospecting" ? prospectingTotals[(e.sbamName||"").trim().toLowerCase()] : undefined });
+  });
 }
 function renderDealLog(){
   const body = document.getElementById("dealLogBody");
   const section = document.getElementById("dealLogSection");
   if (!body || !section) return;
-  if (dealLog.length === 0){
+  const withPayouts = computeLogWithPayouts(dealLog);
+  if (withPayouts.length === 0){
     section.classList.remove("has-entries");
-    body.innerHTML = `<tr><td colspan="5" class="empty-state">No saved deals yet. Build a deal above, then tap "Save This Deal to Log."</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" class="empty-state">No saved deals yet. Build a deal above, pick a Sale Type, then tap "Save This Deal to GP Log."</td></tr>`;
   } else {
     section.classList.add("has-entries");
-    body.innerHTML = dealLog.slice().reverse().map(e => `
+    body.innerHTML = withPayouts.slice().reverse().map(e => {
+      const typeLabel = e.saleType === "store" ? "Store" : (e.saleType === "prospecting" ? "Prospecting" : "—");
+      const details = e.saleType === "store"
+        ? `${escapeHtml(e.storeLocation || "(no location)")}${e.storeRep ? " · " + escapeHtml(e.storeRep) : ""}${e.invoiceNumber ? " · Inv# " + escapeHtml(e.invoiceNumber) : " · (no invoice #)"}`
+        : (e.saleType === "prospecting" ? `SBAM: ${escapeHtml(e.sbamName || "(unnamed)")}` : "—");
+      return `
       <tr>
         <td>${escapeHtml(e.date)}</td>
         <td>${escapeHtml(e.accountName)}</td>
-        <td class="center">${e.itemCount}</td>
+        <td>${typeLabel}<br><span style="color:var(--grey); font-size:11.5px;">${details}</span></td>
         <td class="num">$${formatMoney(e.totalGP)}</td>
+        <td style="font-size:12px;">${escapeHtml(e._payoutLabel)}</td>
+        <td class="num">$${formatMoney(e._payout)}</td>
         <td class="center"><button class="row-remove" onclick="deleteLogEntry('${e.id}')" title="Remove">✕</button></td>
-      </tr>`).join("");
+      </tr>`;
+    }).join("");
   }
-  const grand = dealLog.reduce((s,e) => s + e.totalGP, 0);
+  const grandGP = withPayouts.reduce((s,e) => s + e.totalGP, 0);
+  const grandPayout = withPayouts.reduce((s,e) => s + e._payout, 0);
   const totalEl = document.getElementById("dealLogGrandTotal");
-  if (totalEl) totalEl.textContent = "$" + formatMoney(grand);
+  if (totalEl) totalEl.textContent = "$" + formatMoney(grandGP);
+  const payoutTotalEl = document.getElementById("dealLogGrandPayout");
+  if (payoutTotalEl) payoutTotalEl.textContent = "$" + formatMoney(grandPayout);
   const countEl = document.getElementById("dealLogCount");
-  if (countEl) countEl.textContent = dealLog.length + " saved deal" + (dealLog.length===1?"":"s");
+  if (countEl) countEl.textContent = withPayouts.length + " saved deal" + (withPayouts.length===1?"":"s");
+
+  // Breakdown block: Store-New / Store-Upgrade / Prospecting / Grand total
+  const breakdownEl = document.getElementById("dealLogBreakdown");
+  if (breakdownEl){
+    const storeNew = withPayouts.filter(e => e.saleType==="store" && e.gpType!=="upgrade");
+    const storeUpgrade = withPayouts.filter(e => e.saleType==="store" && e.gpType==="upgrade");
+    const prospecting = withPayouts.filter(e => e.saleType==="prospecting");
+    const sum = arr => arr.reduce((s,e)=>s+e.totalGP,0);
+    const sumPay = arr => arr.reduce((s,e)=>s+e._payout,0);
+    const rows = [
+      ["Store — New (12%)", storeNew.length, sum(storeNew), sumPay(storeNew)],
+      ["Store — Upgrade (5%)", storeUpgrade.length, sum(storeUpgrade), sumPay(storeUpgrade)],
+      ["Prospecting (20%/25%)", prospecting.length, sum(prospecting), sumPay(prospecting)],
+    ];
+    breakdownEl.innerHTML = rows.map(r => `
+      <div class="breakdown-row">
+        <span class="breakdown-label">${r[0]} <span class="breakdown-count">(${r[1]})</span></span>
+        <span class="breakdown-gp">GP $${formatMoney(r[2])}</span>
+        <span class="breakdown-payout">Payout $${formatMoney(r[3])}</span>
+      </div>`).join("");
+  }
 }
 function deleteLogEntry(id){
   if (!confirm("Remove this saved deal from your log? This can't be undone.")) return;
@@ -512,24 +643,66 @@ function csvEscape(val){
 }
 function downloadDealLog(){
   if (dealLog.length === 0){ alert("Your GP log is empty — save a deal first."); return; }
+  const withPayouts = computeLogWithPayouts(dealLog);
   const rows = [];
   rows.push(["Your Wireless — SMB GP Sales Log"]);
   rows.push(["Exported", new Date().toLocaleString()]);
   rows.push([]);
-  rows.push(["Date","Account / Customer","Item","Category","Rate","Qty","Line GP","Deal Total GP"]);
-  dealLog.forEach(e => {
+
+  // --- Summary table: one row per saved deal, with invoice/store/SBAM reference info and payout ---
+  rows.push(["DEAL SUMMARY — one row per saved deal"]);
+  rows.push(["Date","Sale Type","Account / Customer","Store Location","Store Rep","Invoice #","SBAM Name","GP Type / Rate","Total GP","SBAM Payout"]);
+  withPayouts.forEach(e => {
+    rows.push([
+      e.date,
+      e.saleType === "store" ? "Store" : (e.saleType === "prospecting" ? "Prospecting" : ""),
+      e.accountName,
+      e.storeLocation || "",
+      e.storeRep || "",
+      e.invoiceNumber || "",
+      e.sbamName || "",
+      e._payoutLabel,
+      e.totalGP,
+      e._payout.toFixed(2)
+    ]);
+  });
+  const grandGP = withPayouts.reduce((s,e) => s + e.totalGP, 0);
+  const grandPayout = withPayouts.reduce((s,e) => s + e._payout, 0);
+  rows.push(["","","","","","","","GRAND TOTAL", grandGP, grandPayout.toFixed(2)]);
+  rows.push([]);
+
+  // --- Breakdown by commission bucket ---
+  const storeNew = withPayouts.filter(e => e.saleType==="store" && e.gpType!=="upgrade");
+  const storeUpgrade = withPayouts.filter(e => e.saleType==="store" && e.gpType==="upgrade");
+  const prospecting = withPayouts.filter(e => e.saleType==="prospecting");
+  const sum = arr => arr.reduce((s,e)=>s+e.totalGP,0);
+  const sumPay = arr => arr.reduce((s,e)=>s+e._payout,0);
+  rows.push(["PAYOUT BREAKDOWN"]);
+  rows.push(["Bucket","# Deals","Total GP","Total SBAM Payout"]);
+  rows.push(["Store — New (12%)", storeNew.length, sum(storeNew), sumPay(storeNew).toFixed(2)]);
+  rows.push(["Store — Upgrade (5%)", storeUpgrade.length, sum(storeUpgrade), sumPay(storeUpgrade).toFixed(2)]);
+  rows.push(["Prospecting (20% up to $15k cumulative per SBAM, 25% retroactive after)", prospecting.length, sum(prospecting), sumPay(prospecting).toFixed(2)]);
+  rows.push(["GRAND TOTAL", withPayouts.length, grandGP, grandPayout.toFixed(2)]);
+  rows.push([]);
+
+  // --- Full itemized detail, for invoice/line-level reference ---
+  rows.push(["ITEMIZED DETAIL — every line on every saved deal"]);
+  rows.push(["Date","Sale Type","Account / Customer","Invoice #","SBAM Name","Item","Category","Rate","Qty","Line GP","Deal Total GP","Deal Payout"]);
+  withPayouts.forEach(e => {
     e.items.forEach((it, idx) => {
       rows.push([
         idx===0 ? e.date : "",
+        idx===0 ? (e.saleType === "store" ? "Store" : (e.saleType === "prospecting" ? "Prospecting" : "")) : "",
         idx===0 ? e.accountName : "",
+        idx===0 ? (e.invoiceNumber || "") : "",
+        idx===0 ? (e.sbamName || "") : "",
         it.name, it.category, it.payout, it.qty, it.subtotal,
-        idx===0 ? e.totalGP : ""
+        idx===0 ? e.totalGP : "",
+        idx===0 ? e._payout.toFixed(2) : ""
       ]);
     });
   });
-  const grand = dealLog.reduce((s,e) => s + e.totalGP, 0);
-  rows.push([]);
-  rows.push(["","","","","","","GRAND TOTAL — ALL SAVED DEALS", grand]);
+
   const csv = rows.map(r => r.map(csvEscape).join(",")).join("\r\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -624,10 +797,12 @@ function init(){
   loadCatalog();
   loadDeal();
   loadDealLog();
+  loadDealMeta();
   populateCategorySelect();
   renderQuickAdd();
   renderDeal();
   renderSuggestions();
+  renderDealDetails();
   renderDealLog();
   updateVersionTag();
   setOfflinePill(!navigator.onLine);

@@ -78,6 +78,50 @@
   <div class="card">
     <h2>Current Deal</h2>
     <p class="sub" id="dealSub">Nothing added yet — pick items above.</p>
+
+    <div class="deal-details-box no-print">
+      <div class="deal-details-row">
+        <div>
+          <label>Customer / Account Name</label>
+          <input type="text" id="dealAccountName" placeholder="e.g. Acme Plumbing" oninput="updateDealMeta('accountName', this.value)">
+        </div>
+        <div>
+          <label>Sale Type</label>
+          <select id="saleTypeSelect" onchange="updateDealMeta('saleType', this.value)">
+            <option value="">— Select Sale Type —</option>
+            <option value="store">Store</option>
+            <option value="prospecting">Prospecting</option>
+          </select>
+        </div>
+      </div>
+      <div class="deal-details-row" id="storeFields" style="display:none;">
+        <div>
+          <label>Store Location</label>
+          <input type="text" id="storeLocationInput" placeholder="e.g. Store #42 — Main St" oninput="updateDealMeta('storeLocation', this.value)">
+        </div>
+        <div>
+          <label>Store Rep</label>
+          <input type="text" id="storeRepInput" placeholder="Rep name" oninput="updateDealMeta('storeRep', this.value)">
+        </div>
+        <div>
+          <label>Invoice #</label>
+          <input type="text" id="invoiceNumberInput" placeholder="Invoice / order #" oninput="updateDealMeta('invoiceNumber', this.value)">
+        </div>
+        <div>
+          <label>GP Type (SBAM rate)</label>
+          <select id="gpTypeSelect" onchange="updateDealMeta('gpType', this.value)">
+            <option value="new">New Account / New Line (12%)</option>
+            <option value="upgrade">Upgrade (5%)</option>
+          </select>
+        </div>
+      </div>
+      <div class="deal-details-row" id="prospectingFields" style="display:none;">
+        <div>
+          <label>SBAM Name</label>
+          <input type="text" id="sbamNameInput" placeholder="SBAM name" oninput="updateDealMeta('sbamName', this.value)">
+        </div>
+      </div>
+    </div>
     <div style="overflow-x:auto;">
       <table id="dealTable">
         <thead>
@@ -126,8 +170,10 @@
           <tr>
             <th>Date</th>
             <th>Account / Customer</th>
-            <th class="center">Items</th>
+            <th>Type / Details</th>
             <th class="num">Total GP</th>
+            <th>SBAM Rate</th>
+            <th class="num">Payout</th>
             <th class="center"> </th>
           </tr>
         </thead>
@@ -138,11 +184,18 @@
       <span>Running total — all saved deals</span>
       <span class="deal-log-total-amount" id="dealLogGrandTotal">$0</span>
     </div>
+    <div class="deal-log-total-bar payout-bar">
+      <span>Running SBAM payout — all saved deals</span>
+      <span class="deal-log-total-amount" id="dealLogGrandPayout">$0</span>
+    </div>
+
+    <div class="breakdown-box" id="dealLogBreakdown"></div>
+
     <div class="btn-row">
       <button class="btn btn-outline btn-sm" onclick="downloadDealLog()">⬇ Download GP Log (.csv)</button>
       <button class="btn btn-danger btn-sm" onclick="clearDealLog()">Clear Log</button>
     </div>
-    <p class="note">This log lives on this device only (it isn't shared with other reps or synced to the cloud). Saving a deal here does not clear the Current Deal above — build and save as many deals as you like, then download the CSV any time to see every saved deal added up in one file, ready for Excel or email.</p>
+    <p class="note">This log lives on this device only (it isn't shared with other reps or synced to the cloud). Saving a deal here does not clear the Current Deal above — build and save as many deals as you like, then download the CSV any time to see every saved deal added up in one file, ready for Excel or email. Prospecting payout is recalculated across all of an SBAM's saved prospecting deals: once their running total GP reaches $15,000, every one of their prospecting deals here (not just the newest) shows the 25% rate.</p>
   </div>
 
   <!-- ADMIN / CATALOG EDITOR -->

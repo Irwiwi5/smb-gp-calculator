@@ -5,6 +5,26 @@ your team can add it to their Android (or iPhone) home screen like a real
 app — no app store, no $25 fee, no review process — and it keeps working
 without internet after that first install.
 
+## Sale Type, invoice tracking, and SBAM payout (new)
+
+Every deal now starts with a **Sale Type**: Store or Prospecting.
+
+- **Store** asks for Store Location, Store Rep, Invoice #, and whether the
+  deal is **New** or **Upgrade** GP — New pays the SBAM 12%, Upgrade pays 5%.
+- **Prospecting** asks for the SBAM's name. Prospecting pays 20%, but once
+  that SBAM's *running total* prospecting GP (summed across every
+  Prospecting deal saved in the GP Sales Tracker, on that device) reaches
+  $15,000, every one of their prospecting deals — not just the newest —
+  is recalculated at 25%. This matches the SBAM comp plan: the jump to 25%
+  is retroactive on the whole tracked amount, not just the GP over $15k.
+
+The GP Sales Tracker shows both the GP and the SBAM payout for every saved
+deal, a running total of each, and a breakdown by bucket (Store–New,
+Store–Upgrade, Prospecting). The downloadable CSV includes a deal summary
+with Invoice #/Store/SBAM info for lookups, a payout breakdown, and the
+full itemized line detail for every saved deal — everything needed to
+reference an invoice or reconcile a payout later.
+
 ## What's in this folder
 
 - `index.html` — the app itself

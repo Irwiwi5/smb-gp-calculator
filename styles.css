@@ -412,3 +412,63 @@
 }
 .deal-log-total-amount{ color:var(--gold,#B88A2E); font-size:17px; font-weight:800; }
 #dealLogSection .empty-state{ color:var(--grey); }
+
+/* ---------- Deal details (sale type / store / prospecting fields) ---------- */
+.deal-details-box{
+  background:var(--bg,#F2F4F7);
+  border:1px solid var(--border,#DDE2E8);
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:16px;
+}
+.deal-details-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+  gap:12px;
+  margin-bottom:10px;
+}
+.deal-details-row:last-child{ margin-bottom:0; }
+.deal-details-row label{
+  display:block;
+  font-size:11.5px;
+  font-weight:700;
+  color:var(--grey);
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  margin-bottom:4px;
+}
+.deal-details-row input, .deal-details-row select{
+  width:100%;
+  padding:9px 10px;
+  border:1px solid var(--border,#DDE2E8);
+  border-radius:7px;
+  font-size:14px;
+  background:#fff;
+  box-sizing:border-box;
+}
+
+/* ---------- Payout bar + breakdown ---------- */
+.deal-log-total-bar.payout-bar{
+  background:var(--green,#1E6B3C);
+}
+.breakdown-box{
+  background:var(--bg,#F2F4F7);
+  border:1px solid var(--border,#DDE2E8);
+  border-radius:10px;
+  padding:10px 16px;
+  margin-bottom:12px;
+}
+.breakdown-row{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  gap:8px;
+  padding:7px 0;
+  border-bottom:1px solid var(--border,#DDE2E8);
+  font-size:13.5px;
+}
+.breakdown-row:last-child{ border-bottom:none; }
+.breakdown-label{ font-weight:600; color:var(--navy,#1F3A5F); flex:1 1 180px; }
+.breakdown-count{ font-weight:400; color:var(--grey); }
+.breakdown-gp{ color:var(--grey); flex:0 0 auto; }
+.breakdown-payout{ font-weight:700; color:var(--green,#1E6B3C); flex:0 0 auto; }
