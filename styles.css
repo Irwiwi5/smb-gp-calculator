@@ -396,3 +396,19 @@
   text-align:center;
   margin-top:18px;
 }
+
+/* ---------- Deal log / GP sales tracker ---------- */
+.deal-log-total-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:var(--navy,#1F3A5F);
+  color:#fff;
+  border-radius:8px;
+  padding:10px 16px;
+  margin:12px 0;
+  font-size:14px;
+  font-weight:600;
+}
+.deal-log-total-amount{ color:var(--gold,#B88A2E); font-size:17px; font-weight:800; }
+#dealLogSection .empty-state{ color:var(--grey); }

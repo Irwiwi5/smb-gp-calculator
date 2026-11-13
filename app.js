@@ -16,6 +16,10 @@ const DEFAULT_CATALOG = [
   { key:"tmp-md-biz-25-49", name:"TMP MD for Business — 25–49 lines", category:"Device Protection / Tech Support", payout:897, type:"account", notes:"Confirm per-line vs flat scaling" },
   { key:"tech-team-tmp-md-11-24", name:"Tech Team + TMP MD Bundle — 11–24 lines", category:"Device Protection / Tech Support", payout:667, type:"account", notes:"One enrollment, whole account" },
   { key:"tmp-md-biz-11-24", name:"TMP MD for Business — 11–24 lines", category:"Device Protection / Tech Support", payout:447, type:"account", notes:"Confirm per-line vs flat scaling" },
+  { key:"ip-newacct-270", name:"VZW iPhone — New Account Activation", category:"Equipment Activation / Upgrade", payout:270, type:"line", notes:"Exhibit B Chart 4: $130 activation + $140 new-account incentive" },
+  { key:"sp-newacct-270", name:"Smartphone (Android) — New Account Activation", category:"Equipment Activation / Upgrade", payout:270, type:"line", notes:"Exhibit B Chart 4: $130 activation + $140 new-account incentive; excludes iPhone" },
+  { key:"ip-addaline-220", name:"VZW iPhone — Add-A-Line Activation", category:"Equipment Activation / Upgrade", payout:220, type:"line", notes:"Exhibit B Chart 4: $130 activation + $90 add-a-line incentive" },
+  { key:"sp-addaline-220", name:"Smartphone (Android) — Add-A-Line Activation", category:"Equipment Activation / Upgrade", payout:220, type:"line", notes:"Exhibit B Chart 4: $130 activation + $90 add-a-line incentive; excludes iPhone" },
   { key:"bi-fwa-400mbps", name:"5G Business Internet — 400 Mbps (FWA)", category:"Business Internet (FWA)", payout:380, type:"line", notes:"Per device installed" },
   { key:"tech-team-biz-25-49", name:"Tech Team for Business — 25–49 lines", category:"Device Protection / Tech Support", payout:360, type:"account", notes:"Flat, per account" },
   { key:"bi-fwa-200-500-1g", name:"Business Internet FWA — 200/500 Mbps / 1 Gbps", category:"Business Internet (FWA)", payout:355, type:"line", notes:"Per device installed" },
@@ -23,20 +27,32 @@ const DEFAULT_CATALOG = [
   { key:"tech-team-biz-11-24", name:"Tech Team for Business — 11–24 lines", category:"Device Protection / Tech Support", payout:220, type:"account", notes:"Flat, per account" },
   { key:"bi-fwa-100-300-10", name:"Business Internet FWA — 100/300 Mbps / 10 Mbps", category:"Business Internet (FWA)", payout:305, type:"line", notes:"Per device installed" },
   { key:"onetalk-desk-select-lte", name:"One Talk (Select LTE) Desk Phone", category:"One Talk", payout:170, type:"line", notes:"SMB \"BE\" accounts only" },
-  { key:"biz-complete-unltd", name:"Verizon Business Complete Unlimited (Preferred/Standard)", category:"Price Plan", payout:150, type:"line", notes:"New line + device rental only" },
+  { key:"biz-complete-preferred", name:"Verizon Business Complete Unlimited — Preferred Plan", category:"Price Plan", payout:150, type:"line", notes:"New line + device rental only, SMB (BE). No separate upgrade commission." },
+  { key:"biz-complete-standard", name:"Verizon Business Complete Unlimited — Standard Plan", category:"Price Plan", payout:150, type:"line", notes:"New line + device rental only, SMB (BE). No separate upgrade commission." },
   { key:"tech-team-biz-3-10", name:"Tech Team for Business — 3–10 lines", category:"Device Protection / Tech Support", payout:162, type:"account", notes:"Flat, per account" },
   { key:"masters-onetalk-16-75", name:"Masters Telecom One Talk Support — 16–75 users", category:"One Talk", payout:125, type:"account", notes:"Per account" },
-  { key:"smartphone-activation-installment", name:"Smartphone / iPhone Activation (Installment, SMB New Account)", category:"Equipment Activation", payout:140, type:"line", notes:"Per line" },
+  { key:"ip-upgrade-130", name:"VZW iPhone — Upgrade", category:"Equipment Activation / Upgrade", payout:130, type:"line", notes:"Exhibit B Chart 4 upgrade commission, SMB" },
+  { key:"sp-upgrade-130", name:"Smartphone (Android) — Upgrade", category:"Equipment Activation / Upgrade", payout:130, type:"line", notes:"Exhibit B Chart 4 upgrade commission, SMB; excludes iPhone" },
   { key:"masters-onetalk-1-15", name:"Masters Telecom One Talk Support — 1–15 users", category:"One Talk", payout:75, type:"account", notes:"Per account" },
+  { key:"kicker-line-spiff-6plus", name:"Sales Kicker — Line SPIFF, 6+ lines (per line)", category:"Sales Kickers (Internal SPIFF)", payout:30, type:"line", notes:"Retroactive ladder — confirm current terms with your director; separate from Verizon Exhibit B GP" },
+  { key:"bp-newacct-70", name:"Basic Phone — New Account Activation", category:"Equipment Activation / Upgrade", payout:70, type:"line", notes:"Exhibit B Chart 4: $50 activation + $20 new-account incentive" },
+  { key:"bp-addaline-70", name:"Basic Phone — Add-A-Line Activation", category:"Equipment Activation / Upgrade", payout:70, type:"line", notes:"Exhibit B Chart 4: $50 activation + $20 add-a-line incentive" },
   { key:"biz-internet-security-preferred", name:"Verizon Business Internet Security — Preferred", category:"Optional Feature", payout:65, type:"line", notes:"Per line" },
   { key:"tmp-biz-tech-coach-standalone", name:"TMP for Business / Tech Coach (standalone)", category:"Device Protection / Tech Support", payout:65, type:"line", notes:"Per line / enrollment" },
-  { key:"biz-unltd-plus-pro", name:"Business Unlimited Plus / Pro — Price Plan", category:"Price Plan", payout:60, type:"line", notes:"Per line, on activation" },
+  { key:"biz-unltd-plus", name:"Business Unlimited Plus — Price Plan", category:"Price Plan", payout:60, type:"line", notes:"Per line, on activation. $25 on upgrade — add that separately if needed." },
+  { key:"biz-unltd-pro", name:"Business Unlimited Pro — Price Plan", category:"Price Plan", payout:60, type:"line", notes:"Per line, on activation. $25 on upgrade — add that separately if needed." },
+  { key:"ipad-activation-90", name:"VZW iPad — Activation", category:"Equipment Activation / Upgrade", payout:90, type:"line", notes:"Exhibit B Chart 4" },
   { key:"protect-home-fwa-whole-office", name:"Verizon Protect Home (FWA) / Whole Office Mgmt", category:"Optional Feature", payout:100, type:"line", notes:"Per line" },
   { key:"biz-internet-security-plus", name:"Verizon Business Internet Security — Plus", category:"Optional Feature", payout:40, type:"line", notes:"Per line" },
+  { key:"kicker-line-spiff-3-5", name:"Sales Kicker — Line SPIFF, 3–5 lines (per line)", category:"Sales Kickers (Internal SPIFF)", payout:20, type:"line", notes:"Retroactive ladder — confirm current terms with your director; separate from Verizon Exhibit B GP" },
   { key:"second-number-price-plan", name:"Second Number — Price Plan Commission", category:"Price Plan", payout:50, type:"line", notes:"Regular 2nd Number only" },
+  { key:"tablet-activation-90", name:"Tablet (excl. iPad) — Activation", category:"Equipment Activation / Upgrade", payout:90, type:"line", notes:"Exhibit B Chart 4" },
   { key:"onetalk-auto-receptionist", name:"One Talk Auto Receptionist", category:"Optional Feature", payout:30, type:"line", notes:"Per line" },
-  { key:"tablet-activation-smb", name:"VZW Tablet Activation (SMB New Account)", category:"Equipment Activation", payout:40, type:"line", notes:"Per line" },
-  { key:"hotspot-activation-smb", name:"4G/5G Mobile Hotspot Activation (SMB)", category:"Equipment Activation", payout:60, type:"line", notes:"Per line" },
+  { key:"ipad-upgrade-80", name:"VZW iPad — Upgrade", category:"Equipment Activation / Upgrade", payout:80, type:"line", notes:"Exhibit B Chart 4" },
+  { key:"tablet-upgrade-80", name:"Tablet (excl. iPad) — Upgrade", category:"Equipment Activation / Upgrade", payout:80, type:"line", notes:"Exhibit B Chart 4" },
+  { key:"hotspot-act-or-upgrade-100", name:"4G/5G Hotspot / USB Modem / Netbook — Activation or Upgrade", category:"Equipment Activation / Upgrade", payout:100, type:"line", notes:"Exhibit B Chart 4 — same rate both ways" },
+  { key:"kicker-line-spiff-1-2", name:"Sales Kicker — Line SPIFF, 1–2 lines (per line)", category:"Sales Kickers (Internal SPIFF)", payout:10, type:"line", notes:"Retroactive ladder — confirm current terms with your director; separate from Verizon Exhibit B GP" },
+  { key:"kicker-lead-spiff", name:"Sales Kicker — Qualifying Corporate Lead SPIFF", category:"Sales Kickers (Internal SPIFF)", payout:5, type:"line", notes:"Paid once per qualifying lead — confirm current terms with your director" },
   { key:"biz-mobile-internet-security-addon", name:"Business Mobile Internet Security (add-on)", category:"Optional Feature", payout:8, type:"line", notes:"Per line" },
   { key:"whole-office-protection", name:"Whole Office Protection", category:"Optional Feature", payout:100, type:"line", notes:"Per line" },
   { key:"smb-fwa-priority-help-desk", name:"SMB FWA Priority Help Desk (4G/5G)", category:"Optional Feature", payout:5, type:"line", notes:"Per line" },
@@ -45,11 +61,13 @@ const DEFAULT_CATALOG = [
 const LS_CATALOG = "ywGpCalc_catalog_v1";
 const LS_DEAL = "ywGpCalc_deal_v1";
 const LS_CATALOG_VERSION = "ywGpCalc_catalogVersion_v1";
+const LS_DEAL_LOG = "ywGpCalc_dealLog_v1";
 const CATALOG_URL = "./catalog.json";
 
 let catalog = [];
 let deal = []; // { id, name, category, payout, type, qty }
 let nextDealId = 1;
+let dealLog = []; // { id, date, accountName, repName, itemCount, totalGP, items:[{name,category,payout,qty,subtotal}] }
 
 function uid(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
@@ -73,6 +91,16 @@ function loadDeal(){
 }
 function saveDeal(){
   localStorage.setItem(LS_DEAL, JSON.stringify(deal));
+}
+function loadDealLog(){
+  const raw = localStorage.getItem(LS_DEAL_LOG);
+  if (raw){
+    try { dealLog = JSON.parse(raw); return; } catch(e){}
+  }
+  dealLog = [];
+}
+function saveDealLog(){
+  localStorage.setItem(LS_DEAL_LOG, JSON.stringify(dealLog));
 }
 
 /* ---------------- CATEGORY / ITEM SELECTS ---------------- */
@@ -337,8 +365,8 @@ function importCatalog(evt){
    Edit that one file + publish, and every phone picks up the change next time it's online —
    no new app build, no re-sending files. Matching is by "key", so any item a rep added
    locally (no key) is never touched, and any item that's still identical is left alone. */
-function mergeRemoteCatalog(remoteItems){
-  let added = 0, updated = 0;
+function mergeRemoteCatalog(remoteItems, removedKeys){
+  let added = 0, updated = 0, removed = 0;
   remoteItems.forEach(r => {
     const local = catalog.find(c => c.key === r.key);
     if (local){
@@ -351,8 +379,13 @@ function mergeRemoteCatalog(remoteItems){
       added++;
     }
   });
-  if (added || updated) saveCatalog();
-  return { added, updated };
+  if (Array.isArray(removedKeys) && removedKeys.length){
+    const before = catalog.length;
+    catalog = catalog.filter(c => !(c.key && removedKeys.includes(c.key)));
+    removed = before - catalog.length;
+  }
+  if (added || updated || removed) saveCatalog();
+  return { added, updated, removed };
 }
 
 function setOfflinePill(offline){
@@ -377,7 +410,7 @@ function checkForUpdates(silent){
         if (!silent) showToast("You're already on the latest price list (v" + data.version + ").");
         return;
       }
-      const { added, updated } = mergeRemoteCatalog(data.items);
+      const { added, updated, removed } = mergeRemoteCatalog(data.items, data.removed);
       localStorage.setItem(LS_CATALOG_VERSION, data.version);
       populateCategorySelect();
       renderQuickAdd();
@@ -385,8 +418,8 @@ function checkForUpdates(silent){
       renderSuggestions();
       if (adminOpen) renderCatalogEditor();
       updateVersionTag();
-      if (added || updated || !localVersion){
-        showToast(`Price list updated to v${data.version} (${added} new, ${updated} re-priced).`);
+      if (added || updated || removed || !localVersion){
+        showToast(`Price list updated to v${data.version} (${added} new, ${updated} re-priced, ${removed} retired).`);
       } else if (!silent){
         showToast("Price list is current (v" + data.version + ").");
       }
@@ -411,6 +444,102 @@ function updateVersionTag(){
   const v = localStorage.getItem(LS_CATALOG_VERSION) || "local default";
   const tag = document.getElementById("versionTag");
   if (tag) tag.textContent = "Price list version: " + v;
+}
+
+/* ---------------- GP SALES TRACKER (deal log) ----------------
+   Separate from the Current Deal builder above: this is a running log of
+   every deal a rep has finished and chosen to save, so they can download
+   one file that totals up everything they've closed — independent of
+   whatever's currently in the builder. Saving a deal here does NOT clear
+   the Current Deal. */
+function saveDealToLog(){
+  if (deal.length === 0){ alert("Add items to the deal before saving it to your log."); return; }
+  const accountName = (prompt("Account / customer name for this deal (optional):", "") || "").trim();
+  const total = deal.reduce((s,d) => s + d.payout*d.qty, 0);
+  const entry = {
+    id: uid(),
+    date: new Date().toISOString().slice(0,10),
+    accountName: accountName || "(unnamed account)",
+    itemCount: deal.length,
+    totalGP: total,
+    items: deal.map(d => ({ name:d.name, category:d.category, payout:d.payout, qty:d.qty, subtotal: d.payout*d.qty }))
+  };
+  dealLog.push(entry);
+  saveDealLog();
+  renderDealLog();
+  showToast(`Saved "${entry.accountName}" — $${formatMoney(total)} — to your GP log.`);
+}
+function renderDealLog(){
+  const body = document.getElementById("dealLogBody");
+  const section = document.getElementById("dealLogSection");
+  if (!body || !section) return;
+  if (dealLog.length === 0){
+    section.classList.remove("has-entries");
+    body.innerHTML = `<tr><td colspan="5" class="empty-state">No saved deals yet. Build a deal above, then tap "Save This Deal to Log."</td></tr>`;
+  } else {
+    section.classList.add("has-entries");
+    body.innerHTML = dealLog.slice().reverse().map(e => `
+      <tr>
+        <td>${escapeHtml(e.date)}</td>
+        <td>${escapeHtml(e.accountName)}</td>
+        <td class="center">${e.itemCount}</td>
+        <td class="num">$${formatMoney(e.totalGP)}</td>
+        <td class="center"><button class="row-remove" onclick="deleteLogEntry('${e.id}')" title="Remove">✕</button></td>
+      </tr>`).join("");
+  }
+  const grand = dealLog.reduce((s,e) => s + e.totalGP, 0);
+  const totalEl = document.getElementById("dealLogGrandTotal");
+  if (totalEl) totalEl.textContent = "$" + formatMoney(grand);
+  const countEl = document.getElementById("dealLogCount");
+  if (countEl) countEl.textContent = dealLog.length + " saved deal" + (dealLog.length===1?"":"s");
+}
+function deleteLogEntry(id){
+  if (!confirm("Remove this saved deal from your log? This can't be undone.")) return;
+  dealLog = dealLog.filter(e => e.id !== id);
+  saveDealLog();
+  renderDealLog();
+}
+function clearDealLog(){
+  if (dealLog.length === 0) return;
+  if (!confirm("Clear your entire GP sales log? This removes all " + dealLog.length + " saved deals and can't be undone. Download it first if you want to keep a copy.")) return;
+  dealLog = [];
+  saveDealLog();
+  renderDealLog();
+}
+function csvEscape(val){
+  const s = String(val == null ? "" : val);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function downloadDealLog(){
+  if (dealLog.length === 0){ alert("Your GP log is empty — save a deal first."); return; }
+  const rows = [];
+  rows.push(["Your Wireless — SMB GP Sales Log"]);
+  rows.push(["Exported", new Date().toLocaleString()]);
+  rows.push([]);
+  rows.push(["Date","Account / Customer","Item","Category","Rate","Qty","Line GP","Deal Total GP"]);
+  dealLog.forEach(e => {
+    e.items.forEach((it, idx) => {
+      rows.push([
+        idx===0 ? e.date : "",
+        idx===0 ? e.accountName : "",
+        it.name, it.category, it.payout, it.qty, it.subtotal,
+        idx===0 ? e.totalGP : ""
+      ]);
+    });
+  });
+  const grand = dealLog.reduce((s,e) => s + e.totalGP, 0);
+  rows.push([]);
+  rows.push(["","","","","","","GRAND TOTAL — ALL SAVED DEALS", grand]);
+  const csv = rows.map(r => r.map(csvEscape).join(",")).join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "yw-smb-gp-sales-log-" + new Date().toISOString().slice(0,10) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* ---------------- PRINT / COPY SUMMARY ---------------- */
@@ -494,10 +623,12 @@ function registerServiceWorker(){
 function init(){
   loadCatalog();
   loadDeal();
+  loadDealLog();
   populateCategorySelect();
   renderQuickAdd();
   renderDeal();
   renderSuggestions();
+  renderDealLog();
   updateVersionTag();
   setOfflinePill(!navigator.onLine);
   registerServiceWorker();

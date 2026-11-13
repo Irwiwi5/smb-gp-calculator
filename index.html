@@ -110,6 +110,39 @@
       <div class="suggest-title">💡 Highest-value items not yet on this deal</div>
       <div class="chip-wrap" id="suggestChips"></div>
     </div>
+
+    <div class="btn-row no-print" style="margin-top:14px; border-top:1px solid #E3E8EF; padding-top:14px;">
+      <button class="btn btn-gold btn-sm" onclick="saveDealToLog()">💾 Save This Deal to GP Log</button>
+    </div>
+  </div>
+
+  <!-- GP SALES TRACKER / LOG -->
+  <div class="card no-print" id="dealLogSection">
+    <h2>GP Sales Tracker</h2>
+    <p class="sub" id="dealLogCount">No saved deals yet.</p>
+    <div style="overflow-x:auto;">
+      <table id="dealLogTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Account / Customer</th>
+            <th class="center">Items</th>
+            <th class="num">Total GP</th>
+            <th class="center"> </th>
+          </tr>
+        </thead>
+        <tbody id="dealLogBody"></tbody>
+      </table>
+    </div>
+    <div class="deal-log-total-bar">
+      <span>Running total — all saved deals</span>
+      <span class="deal-log-total-amount" id="dealLogGrandTotal">$0</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline btn-sm" onclick="downloadDealLog()">⬇ Download GP Log (.csv)</button>
+      <button class="btn btn-danger btn-sm" onclick="clearDealLog()">Clear Log</button>
+    </div>
+    <p class="note">This log lives on this device only (it isn't shared with other reps or synced to the cloud). Saving a deal here does not clear the Current Deal above — build and save as many deals as you like, then download the CSV any time to see every saved deal added up in one file, ready for Excel or email.</p>
   </div>
 
   <!-- ADMIN / CATALOG EDITOR -->
