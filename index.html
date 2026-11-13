@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your Wireless — SMB GP Calculator</title>
+<meta name="description" content="Build an SMB deal and see its GP payout, line by line.">
+
+<!-- PWA: installability -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F3A5F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SMB GP Calc">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="update-banner" id="updateBanner">
+  <span id="updateBannerMsg">Checking for the latest price list…</span>
+  <button class="btn btn-ghost" onclick="dismissUpdateBanner()">Dismiss</button>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <span>Install this on your home screen for one-tap access, even offline.</span>
+  <div>
+    <button class="btn" onclick="installApp()">Install</button>
+    <button class="dismiss" onclick="dismissInstallBanner()" title="Dismiss">✕</button>
+  </div>
+</div>
+
+<header class="app-header">
+  <div class="title-block">
+    <h1>Your Wireless — SMB GP Calculator</h1>
+    <p>Build the deal, see the GP. Confidential — internal use only.</p>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <span class="offline-pill" id="offlinePill"><span class="offline-dot"></span>Offline</span>
+    <div class="admin-toggle no-print" id="adminToggle" onclick="toggleAdmin()">
+      <span class="switch-dot"></span>
+      <span id="adminToggleLabel">Edit Catalog: Off</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- BUILDER -->
+  <div class="card builder-card">
+    <h2>Build the Deal</h2>
+    <p class="sub">Pick a category, pick the product or service, set the line count, add it in.</p>
+    <div class="builder-row">
+      <div>
+        <label>Category</label>
+        <select id="categorySelect" onchange="populateItemSelect()"></select>
+      </div>
+      <div>
+        <label>Product / Service</label>
+        <select id="itemSelect"></select>
+      </div>
+      <div>
+        <label>Qty</label>
+        <input type="number" id="qtyInput" value="1" min="1">
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="addSelectedToDeal()">+ Add to Deal</button>
+      </div>
+    </div>
+
+    <div class="chip-wrap" id="quickAddChips"></div>
+  </div>
+
+  <!-- DEAL TABLE -->
+  <div class="card">
+    <h2>Current Deal</h2>
+    <p class="sub" id="dealSub">Nothing added yet — pick items above.</p>
+    <div style="overflow-x:auto;">
+      <table id="dealTable">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Category</th>
+            <th class="num">Rate</th>
+            <th class="center">Qty</th>
+            <th class="num">GP Subtotal</th>
+            <th class="center"> </th>
+          </tr>
+        </thead>
+        <tbody id="dealBody"></tbody>
+        <tfoot id="dealFoot" style="display:none;">
+          <tr class="deal-total-row">
+            <td colspan="4" class="deal-total-label">Total GP — this deal</td>
+            <td class="num deal-total-amount" id="dealFootTotal">$0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="btn-row no-print">
+      <button class="btn btn-outline btn-sm" onclick="clearDeal()">New Deal (clear)</button>
+      <button class="btn btn-outline btn-sm" onclick="window.print()">🖨 Print / Save Deal as PDF</button>
+      <button class="btn btn-outline btn-sm" onclick="copyDealSummary()">📋 Copy Summary</button>
+    </div>
+
+    <div class="suggest-box" id="suggestBox" style="display:none;">
+      <div class="suggest-title">💡 Highest-value items not yet on this deal</div>
+      <div class="chip-wrap" id="suggestChips"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN / CATALOG EDITOR -->
+  <div class="card no-print" id="adminPanel">
+    <h2>Edit the Product &amp; Service Catalog</h2>
+    <p class="sub">Add, rename, or re-price anything. Changes save automatically to this device/browser. Use Export to share updates with the team, or Import to load someone else's.</p>
+
+    <div class="btn-row" style="margin-bottom:14px;">
+      <button class="btn btn-gold btn-sm" onclick="checkForUpdates(false)">🔄 Check for Price List Updates</button>
+    </div>
+
+    <div class="admin-header">
+      <div>Name</div><div>Category</div><div>Payout ($)</div><div>Paid</div><div>Notes</div><div></div>
+    </div>
+    <div id="catalogEditor"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-gold btn-sm" onclick="addBlankCatalogRow()">+ Add New Product / Service</button>
+      <button class="btn btn-outline btn-sm" onclick="exportCatalog()">⬇ Export Catalog (.json)</button>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">⬆ Import Catalog (.json)</button>
+      <input type="file" id="importFile" accept="application/json" onchange="importCatalog(event)">
+      <button class="btn btn-danger btn-sm" onclick="resetCatalogToDefault()">Reset to Default Catalog</button>
+    </div>
+    <p class="note">Items marked <strong>Account</strong> are flat, one-time payouts for the whole account (e.g. a multi-line protection bundle) — leave Qty at 1 for those unless you're intentionally adding more than one. Items marked <strong>Line</strong> pay per unit — set Qty to the number of lines/devices.</p>
+    <p class="version-tag" id="versionTag">Price list version: —</p>
+  </div>
+
+  <div class="note">
+    Figures are internal GP reference values (Verizon Exhibit B basis) for sizing deals and coaching reps — not a guarantee of final payout. All compensation is subject to standard chargeback rules if service is changed or cancelled early. Confirm before quoting externally.
+  </div>
+
+  <!-- Hidden print-only summary -->
+  <div id="printSummary">
+    <h1>Your Wireless — SMB Deal GP Summary</h1>
+    <div class="meta" id="printMeta"></div>
+    <table>
+      <thead><tr><th>Item</th><th>Category</th><th class="num">Rate</th><th class="center">Qty</th><th class="num">GP</th></tr></thead>
+      <tbody id="printBody"></tbody>
+    </table>
+    <div class="grand" id="printGrand"></div>
+  </div>
+
+</div>
+
+<div class="total-bar">
+  <div>
+    <div class="label">Total GP on This Deal</div>
+    <div class="meta" id="itemCountLabel">0 line items</div>
+  </div>
+  <div class="amount" id="grandTotal">$0</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
